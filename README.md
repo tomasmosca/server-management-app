@@ -1,2 +1,2 @@
 # server-management-app
-A fullstack server management application
+A Fullstack Server Management Application
