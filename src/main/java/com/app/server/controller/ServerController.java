@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,12 @@ public class ServerController {
     public ResponseEntity<Server> deleteServer(@PathVariable Long id) {
         serverService.deleteServer(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/ping/{ipAddress}")
+    public ResponseEntity<?> pingServer(@PathVariable("ipAddress") String ipAddress) throws IOException {
+        Server server = serverService.ping(ipAddress);
+        return ResponseEntity.ok(server.getStatus());
     }
 
 }

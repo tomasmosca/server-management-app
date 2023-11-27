@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.List;
 
 @Service
@@ -25,6 +27,7 @@ public class ServerService {
     public Server createServer(Server server, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         server.setUser(user);
+        server.setImageUrlBasedOnType();
         return serverRepository.save(server);
     }
 
@@ -44,6 +47,8 @@ public class ServerService {
                 .type(serverUpdates.getType() != null ? serverUpdates.getType() : existingServer.getType())
                 .build();
 
+        updatedServer.setImageUrlBasedOnType();
+
         return serverRepository.save(updatedServer);
     }
 
@@ -51,6 +56,17 @@ public class ServerService {
         if (serverRepository.existsById(id)) {
             serverRepository.deleteById(id);
         }
+    }
+
+    public Server ping(String ipAddress) throws IOException {
+        Server server = serverRepository.findByIp(ipAddress).orElse(null);
+        if (server == null) {
+            return null;
+        }
+        InetAddress address = InetAddress.getByName(ipAddress);
+        server.setStatus(address.isReachable(10000) ? Server.Status.SERVER_UP : Server.Status.SERVER_DOWN);
+        serverRepository.save(server);
+        return server;
     }
 
 }
